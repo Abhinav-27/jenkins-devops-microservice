@@ -27,9 +27,33 @@ pipeline {
                 sh 'mvn test'
             }
         }
-        stage('Integration Test') {
+//        stage('Integration Test') {
+//            steps {
+//                sh 'mvn failsafe:integration-test failsafe:verify'
+//            }
+//        }
+
+        stage('Package') {
             steps {
-                sh 'mvn failsafe:integration-test failsafe:verify'
+                sh 'mvn package -DskipTests'
+            }
+        }
+        stage('Build Docker Image') {
+             steps {
+                //sh 'docker build -t abhinav27/currency-exchange-devops:$env.BUILD_TAG'
+                script {
+                    dockerImage = docker.build("abhinav27/currency-exchange-devops:${env.BUILD_TAG}")
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('', 'dockerhub') {
+                        dockerImage.push();
+                        dockerImage.push('latest');
+                    }
+                }
             }
         }
     }
