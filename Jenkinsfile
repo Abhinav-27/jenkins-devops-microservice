@@ -2,13 +2,13 @@ pipeline {
 //    agent {docker {
 //    image 'maven:3.8.4-openjdk-17-slim'
 //}}
-agent any
+    agent any
 
-environment {
-    dockerHome = tool 'myDocker'
-    mavenHome = tool 'myMaven'
-    PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
-}
+    environment {
+        dockerHome = tool 'myDocker'
+        mavenHome = tool 'myMaven'
+        PATH = "$dockerHome/bin:$mavenHome/bin:$PATH"
+    }
     stages {
         stage('Build') {
             steps {
@@ -17,14 +17,19 @@ environment {
                 echo "Build"
             }
         }
-        stage('Test') {
+        stage('Compile') {
             steps {
-                echo "Test"
+                sh 'mvn clean compile'
+            }
+        }
+        stage('Unit Test') {
+            steps {
+                sh 'mvn test'
             }
         }
         stage('Integration Test') {
             steps {
-                echo "Integration Test"
+                sh 'mvn failsafe:integration-test failsafe:verify'
             }
         }
     }
